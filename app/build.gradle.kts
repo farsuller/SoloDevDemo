@@ -77,6 +77,7 @@ dependencies {
     // Paging
     implementation (libs.androidx.paging.runtime.ktx)
     implementation (libs.androidx.paging.compose)
+    implementation (libs.androidx.paging.runtime)
 
     // Retrofit
     implementation (libs.retrofit)
@@ -87,6 +88,7 @@ dependencies {
     implementation (libs.androidx.room.runtime)
     ksp (libs.androidx.room.compiler)
     implementation (libs.androidx.room.ktx)
+    implementation (libs.androidx.room.paging)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
