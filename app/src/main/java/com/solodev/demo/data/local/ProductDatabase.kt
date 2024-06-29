@@ -4,11 +4,11 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [FruitEntity::class],
-    version = 1,
+    entities = [ProductEntity::class],
+    version = 2,
     exportSchema = false
 )
-abstract class FruitDatabase : RoomDatabase(){
+abstract class ProductDatabase : RoomDatabase(){
 
-    abstract val dao: FruitDao
+    abstract val dao: ProductDao
 }

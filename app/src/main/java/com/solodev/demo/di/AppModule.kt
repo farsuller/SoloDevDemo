@@ -5,16 +5,17 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.room.Room
-import com.solodev.demo.data.local.FruitDatabase
-import com.solodev.demo.data.local.FruitEntity
-import com.solodev.demo.data.remote.FruitApi
-import com.solodev.demo.data.remote.FruitRemoteMediator
-import com.solodev.demo.domain.repository.FruitRepository
+import com.solodev.demo.data.local.ProductDatabase
+import com.solodev.demo.data.local.ProductEntity
+import com.solodev.demo.data.remote.ProductApi
+import com.solodev.demo.data.remote.ProductRemoteMediator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.create
@@ -26,10 +27,10 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideFruitDatabase(@ApplicationContext context: Context) : FruitDatabase{
+    fun provideProductDatabase(@ApplicationContext context: Context): ProductDatabase {
         return Room.databaseBuilder(
             context,
-            FruitDatabase::class.java,
+            ProductDatabase::class.java,
             "fruits.db"
         ).build()
     }
@@ -37,32 +38,39 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideFruitApi():FruitApi{
+    fun provideProductApi(): ProductApi {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .build()
+
         return Retrofit.Builder()
-            .baseUrl(FruitApi.BASE_URL)
+            .baseUrl(ProductApi.BASE_URL)
+            .client(client)
             .addConverterFactory(MoshiConverterFactory.create())
             .build()
             .create()
     }
 
-    @Provides
-    @Singleton
-    fun provideFruitRepository(fruitApi: FruitApi): FruitRepository {
-        return FruitRepository(api = fruitApi)
-    }
 
     @OptIn(ExperimentalPagingApi::class)
     @Provides
     @Singleton
-    fun provideFruitPager(fruitDb: FruitDatabase, fruitApi: FruitApi): Pager<Int, FruitEntity> {
+    fun provideProductPager(
+        productDb: ProductDatabase,
+        productApi: ProductApi
+    ): Pager<Int, ProductEntity> {
         return Pager(
-            config = PagingConfig(pageSize = 20),
-            remoteMediator = FruitRemoteMediator(
-                fruitDatabase = fruitDb,
-                fruitRepository = FruitRepository(api = fruitApi)
-        ),
+            config = PagingConfig(pageSize = 5),
+            remoteMediator = ProductRemoteMediator(
+                productDb = productDb,
+                productApi = productApi
+            ),
             pagingSourceFactory = {
-                fruitDb.dao.pagingSource()
+                productDb.dao.pagingSource()
             }
         )
     }

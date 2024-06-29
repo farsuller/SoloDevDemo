@@ -5,23 +5,22 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import com.solodev.demo.data.local.FruitDatabase
-import com.solodev.demo.data.local.FruitEntity
-import com.solodev.demo.data.mappers.toFruitEntity
-import com.solodev.demo.domain.repository.FruitRepository
+import com.solodev.demo.data.local.ProductDatabase
+import com.solodev.demo.data.local.ProductEntity
+import com.solodev.demo.data.mappers.toProductEntity
 import kotlinx.coroutines.delay
 import retrofit2.HttpException
 import java.io.IOException
 
 @OptIn(ExperimentalPagingApi::class)
-class FruitRemoteMediator(
-    private val fruitDatabase: FruitDatabase,
-    private val fruitRepository: FruitRepository,
-) : RemoteMediator<Int, FruitEntity>() {
+class ProductRemoteMediator(
+    private val productDb: ProductDatabase,
+    private val productApi: ProductApi,
+) : RemoteMediator<Int, ProductEntity>() {
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, FruitEntity>
+        state: PagingState<Int, ProductEntity>
     ): MediatorResult {
         return try {
             val loadKey = when (loadType) {
@@ -38,24 +37,23 @@ class FruitRemoteMediator(
             }
 
             delay(2000)
-            val fruits = fruitRepository.getPaginatedFruits(
+
+            val fruits = productApi.getProducts(
                 page = loadKey,
-                perPage = state.config.pageSize
+                pageCount = state.config.pageSize
             )
 
-            println("Fruits: $fruits loadKey $loadKey pageSize ${state.config.pageSize}")
+            println("products ${fruits.products}")
 
-            fruitDatabase.withTransaction {
+            productDb.withTransaction {
                 if(loadType == LoadType.REFRESH){
-                    fruitDatabase.dao.clearAll()
-                    println("Fruits: clearAll")
+                    productDb.dao.clearAll()
                 }
-                val fruitEntities = fruits.map { it.toFruitEntity() }
-                fruitDatabase.dao.upsertAll(fruitEntities)
-                println("Fruits: upsertAll $fruitEntities")
+                val productEntities = fruits.products.map { it.toProductEntity() }
+                productDb.dao.upsertAll(productEntities)
             }
 
-            MediatorResult.Success(endOfPaginationReached = fruits.isEmpty())
+            MediatorResult.Success(endOfPaginationReached = fruits.products.isEmpty())
         } catch (e: IOException) {
             MediatorResult.Error(e)
         } catch (e: HttpException) {

@@ -21,8 +21,8 @@ class MainActivity : ComponentActivity() {
             SoloDevDemoTheme {
                 Surface {
                     val viewmodel = hiltViewModel<FruitsViewModel>()
-                    val fruits = viewmodel.fruitsPagingFlow.collectAsLazyPagingItems()
-                    FruitScreen(fruits = fruits)
+                    val products = viewmodel.productsPagingFlow.collectAsLazyPagingItems()
+                    FruitScreen(products = products)
                 }
             }
         }

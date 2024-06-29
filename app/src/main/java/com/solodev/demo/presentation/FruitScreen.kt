@@ -31,26 +31,29 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 
 import com.solodev.demo.R
-import com.solodev.demo.domain.model.Fruit
+import com.solodev.demo.domain.model.Dimensions
+import com.solodev.demo.domain.model.Meta
+import com.solodev.demo.domain.model.Product
+import com.solodev.demo.domain.model.Review
 import com.solodev.demo.ui.theme.SoloDevDemoTheme
 
 @Composable
-fun FruitScreen(fruits: LazyPagingItems<Fruit>) {
+fun FruitScreen(products: LazyPagingItems<Product>) {
 
     val context = LocalContext.current
 
-    LaunchedEffect(key1 = fruits.loadState) {
-        if (fruits.loadState.refresh is LoadState.Error) {
+    LaunchedEffect(key1 = products.loadState) {
+        if (products.loadState.refresh is LoadState.Error) {
             Toast.makeText(
                 context,
-                "Error: " + (fruits.loadState.refresh as LoadState.Error).error.message,
+                "Error: " + (products.loadState.refresh as LoadState.Error).error.message,
                 Toast.LENGTH_LONG
             ).show()
         }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if(fruits.loadState.refresh is LoadState.Loading) {
+        if(products.loadState.refresh is LoadState.Loading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -61,17 +64,17 @@ fun FruitScreen(fruits: LazyPagingItems<Fruit>) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                items(fruits.itemCount){ fruit ->
-                    fruits[fruit]?.let { f->
-                        FruitItem(
-                            fruit = f,
+                items(products.itemCount){ product ->
+                    products[product]?.let { p->
+                        ProductItem(
+                            product = p,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
 
                 item {
-                    if(fruits.loadState.append is LoadState.Loading) {
+                    if(products.loadState.append is LoadState.Loading) {
                         CircularProgressIndicator()
                     }
                 }
@@ -81,8 +84,8 @@ fun FruitScreen(fruits: LazyPagingItems<Fruit>) {
 }
 
 @Composable
-fun FruitItem(
-    fruit: Fruit,
+fun ProductItem(
+    product: Product,
     modifier: Modifier = Modifier
 ){
     Card(
@@ -97,7 +100,7 @@ fun FruitItem(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = fruit.name,
+                contentDescription = product.title,
                 modifier = Modifier
                     .weight(1f)
                     .height(150.dp)
@@ -109,7 +112,7 @@ fun FruitItem(
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.Center
             ) {
-                fruit.name?.let {
+                product.title?.let {
                     Text(
                         text = it,
                         style = MaterialTheme.typography.titleLarge,
@@ -117,23 +120,23 @@ fun FruitItem(
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                fruit.family?.let {
+                product.description?.let {
                     Text(
                         text = it,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                fruit.genus?.let {
+                product.category?.let {
                     Text(
                         text = it,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                fruit.order?.let {
+                product.price?.let {
                     Text(
-                        text = it,
+                        text = it.toString(),
                         modifier = Modifier.fillMaxWidth(),
 
                     )
@@ -147,13 +150,30 @@ fun FruitItem(
 @Composable
 fun FruitItemPreview() {
     SoloDevDemoTheme {
-        FruitItem(
-            fruit = Fruit(
+        ProductItem(
+            product = Product(
                 id = 1,
-                name = "Apple",
-                family = "Rosaceae",
-                order = "Rosales",
-                genus = "Malus",
+                title = "Apple",
+                description = "Rosaceae",
+                category = "Rosales",
+                price = 49.99,
+                discountPercentage = 0.32,
+                rating = 4.85,
+                stock = 17,
+                tags = listOf("fragrances","perfumes"),
+                brand = "Calvin Klein",
+                sku = "DZM2JQZE",
+                weight = 5,
+                dimensions = Dimensions(width = 11.53, height = 14.44, depth = 6.81),
+                warrantyInformation = "1 year",
+                shippingInformation = "Free shipping",
+                availabilityStatus = "In stock",
+                reviews = listOf(Review(rating = 5, comment = "Great value for money!", date = "2024-05-23T08:56:21.619Z", reviewerName = "Sophia Brown", reviewerEmail = "sophia.brown@x.dummyjson.com")),
+                returnPolicy = "No return policy",
+                minimumOrderQuantity = 1,
+                meta = Meta(createdAt = "", updatedAt = "", barcode = "", qrCode = ""),
+                images = listOf(),
+                thumbnail = ""
             ),
             modifier = Modifier.fillMaxWidth()
         )
